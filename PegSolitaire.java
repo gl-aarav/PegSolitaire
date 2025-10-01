@@ -1,51 +1,122 @@
-
 import java.util.ArrayList;
 
+/**
+ * This class is the main controller for the Peg Solitaire game. It manages
+ * the game flow, user interactions, and game logic.
+ *
+ * @author Aarav Goyal
+ * @since September 30, 2025
+ */
 public class PegSolitaire {
+	/** The game board containing all peg positions */
 	private PegBoard board = new PegBoard();
+
+	/** Debug flag for development and troubleshooting */
 	private final boolean DEBUG = false;
 
+	/**
+	 * Default constructor for PegSolitaire.
+	 * Initializes a new game with a fresh board.
+	 */
 	public PegSolitaire() {
 	}
 
-	public static void main(String[] var0) {
-		PegSolitaire var1 = new PegSolitaire();
-		var1.run();
+	/**
+	 * Main entry point for the Peg Solitaire application.
+	 * Creates a new game instance and starts the game loop.
+	 * 
+	 * @param args command line arguments (not used)
+	 */
+	public static void main(String[] args) {
+		// Create a new instance of the game
+		PegSolitaire game = new PegSolitaire();
+
+		// Start the game
+		game.run();
 	}
 
+	/**
+	 * Main game loop that controls the flow of the game.
+	 * 
+	 * This method handles:
+	 * - Displaying the introduction
+	 * - Processing player moves
+	 * - Checking for game end conditions
+	 * - Displaying the final score
+	 * 
+	 * The game ends when:
+	 * - The player quits by entering 'q'
+	 * - No valid moves remain
+	 * - Only one peg remains (winning condition)
+	 */
 	public void run() {
+		// Display game introduction and rules
 		this.printIntroduction();
-		this.board.printBoard();
-		boolean var1 = false;
 
+		// Show the initial board state
+		this.board.printBoard();
+
+		// Flag to track if the game should end
+		boolean gameOver = false;
+
+		// Main game loop
 		while (true) {
-			String[] var2;
+			String[] input;
+
 			do {
-				if (var1) {
+				// Check if the game has ended
+				if (gameOver) {
+					// Display final score (lower is better)
 					System.out.println("\nYour score: " + this.board.pegCount() + " pegs remaining\n");
 					System.out.println("\nThanks for playing Peg Solitaire!\n");
 					return;
 				}
 
-				var2 = this.getInput();
-				if (var2.length == 2) {
-					int var3 = this.convertToInt(var2[0]);
-					int var4 = this.convertToInt(var2[1]);
-					if (this.board.isValidLocation(var3, var4) && this.board.isPeg(var3, var4)) {
-						this.playPeg(var3, var4);
+				// Get player input for the peg to move
+				input = this.getInput();
+
+				// Process the move if valid input provided (not quit command)
+				if (input.length == 2) {
+					// Convert string coordinates to integers
+					int row = this.convertToInt(input[0]);
+					int col = this.convertToInt(input[1]);
+
+					// Validate the selected peg position
+					if (this.board.isValidLocation(row, col) && this.board.isPeg(row, col)) {
+						// Execute the peg jump
+						this.playPeg(row, col);
 					} else {
-						System.out.println("\nInvalid jumper peg -> " + var3 + " " + var4);
+						// Inform player of invalid selection
+						System.out.println("\nInvalid jumper peg -> " + row + " " + col);
 					}
 				}
 
+				// Display updated board after the move
 				this.board.printBoard();
-			} while (this.board.pegCount() >= 2 && this.hasValidMove() && (var2.length <= 0 || !var2[0].equals("q")));
 
-			var1 = true;
+				// Continue game loop while:
+				// - At least 2 pegs remain (need 2 to make a jump)
+				// - Valid moves are still available
+				// - Player hasn't quit (input[0] != "q")
+			} while (this.board.pegCount() >= 2 && this.hasValidMove() && (input.length <= 0 || !input[0].equals("q")));
+
+			// Set game over flag to exit after next iteration
+			gameOver = true;
 		}
 	}
 
+	/**
+	 * Prints the game introduction including ASCII art title and game rules.
+	 * 
+	 * The introduction includes:
+	 * - ASCII art banner for "Peg Solitaire"
+	 * - Welcome message
+	 * - Brief explanation of game rules
+	 * - Board layout description
+	 * - How to play instructions
+	 */
 	public void printIntroduction() {
+		// Display ASCII art title
 		System.out.println("  _____              _____       _ _ _        _ ");
 		System.out.println(" |  __ \\            / ____|     | (_) |      (_)");
 		System.out.println(" | |__) |__  __ _  | (___   ___ | |_| |_ __ _ _ _ __ ___ ");
@@ -54,128 +125,254 @@ public class PegSolitaire {
 		System.out.println(" |_|   \\___|\\__, | |_____/ \\___/|_|_|\\__\\__,_|_|_|  \\___|");
 		System.out.println("             __/ |");
 		System.out.println("            |___/");
+
+		// Display welcome message
 		System.out.println("\nWelcome to Peg Solitaire!!!\n");
+
+		// Explain the game objective and board layout
 		System.out.println(
 				"Peg Solitaire is a game for one player. The goal is to remove all\nbut one of the 32 pegs from a special board. The board is a 7x7\ngrid with the corners cut out (shown below). Pegs are placed in all");
 		System.out.println(
 				"grid locations except the center which is left empty. Pegs jump\nover other pegs either horizontally or vertically into empty\nlocations and the jumped peg is removed. Play continues until\nthere are no more jumps possible, or there is one peg remaining.");
+
+		// Encourage the player to begin
 		System.out.println("\nLet's play!!!\n");
 	}
 
+	/**
+	 * Gets and validates player input for selecting a peg to jump.
+	 * 
+	 * This method prompts the user to enter the row and column coordinates
+	 * of the peg they want to move. It validates that:
+	 * - The location is valid on the board
+	 * - There is actually a peg at that location
+	 * - The peg has at least one valid move available
+	 * 
+	 * The method loops until valid input is provided or the user quits.
+	 * 
+	 * @return String array containing [row, col] or ["q"] if player quits
+	 */
 	public String[] getInput() {
-		boolean var1 = false;
-		String[] var2 = new String[0];
+		// Flag to track if valid input has been received
+		boolean validInput = false;
 
+		// Array to store the input coordinates
+		String[] input = new String[0];
+
+		// Loop until valid input is received
 		while (true) {
-			while (!var1) {
-				String var3 = Prompt.getString("Jumper peg - row col (ex. 3 5, q=quit)");
-				var2 = var3.split(" +");
-				if (var2.length > 0 && var2[0].equals("q")) {
-					var1 = true;
-				} else if (var2.length > 1) {
-					int var4 = this.convertToInt(var2[0]);
-					int var5 = this.convertToInt(var2[1]);
-					if (this.board.isValidLocation(var4, var5) && this.openValidLocations(var4, var5).size() > 0) {
-						var1 = true;
+			while (!validInput) {
+				// Prompt user for peg coordinates
+				String inputStr = Prompt.getString("Jumper peg - row col (ex. 3 5, q=quit)");
+
+				// Split input by one or more spaces
+				input = inputStr.split(" +");
+
+				// Check if player wants to quit
+				if (input.length > 0 && input[0].equals("q")) {
+					validInput = true;
+				}
+				// Validate the coordinates provided
+				else if (input.length > 1) {
+					// Parse coordinates
+					int row = this.convertToInt(input[0]);
+					int col = this.convertToInt(input[1]);
+
+					// Check if location is valid and has possible moves
+					if (this.board.isValidLocation(row, col) && this.openValidLocations(row, col).size() > 0) {
+						validInput = true;
 					} else {
-						System.out.println("Invalid jumper peg -> " + var3);
+						// Inform player that the peg cannot be moved
+						System.out.println("Invalid jumper peg -> " + inputStr);
 					}
 				}
 			}
 
-			return var2;
+			// Return the validated input
+			return input;
 		}
 	}
 
-	public void playPeg(int var1, int var2) {
-		ArrayList var3 = this.openValidLocations(var1, var2);
-		if (var3.size() < 1) {
-			System.out.println("There is no play for the peg (" + var1 + ", " + var2 + ").");
+	/**
+	 * Executes a peg jump move from the specified position.
+	 * 
+	 * This method:
+	 * 1. Finds all valid jump destinations for the selected peg
+	 * 2. If multiple options exist, prompts the player to choose one
+	 * 3. Removes the jumped-over peg
+	 * 4. Removes the original peg
+	 * 5. Places the peg at the destination
+	 * 
+	 * @param row the row position of the peg to move
+	 * @param col the column position of the peg to move
+	 */
+	public void playPeg(int row, int col) {
+		// Get all valid jump destinations for this peg
+		ArrayList<Location> validMoves = this.openValidLocations(row, col);
+
+		// Check if there are any valid moves
+		if (validMoves.size() < 1) {
+			System.out.println("There is no play for the peg (" + row + ", " + col + ").");
 		} else {
-			Location var4 = null;
-			if (var3.size() > 1) {
+			// Variable to store the chosen destination
+			Location destination = null;
+
+			// If multiple valid moves exist, let player choose
+			if (validMoves.size() > 1) {
 				System.out.println("\nPossible peg jump locations:");
 
-				int var5;
-				for (var5 = 0; var5 < var3.size(); ++var5) {
-					System.out.println(" " + var5 + " " + var3.get(var5));
+				// Display all possible jump locations
+				int choice;
+				for (choice = 0; choice < validMoves.size(); ++choice) {
+					System.out.println(" " + choice + " " + validMoves.get(choice));
 				}
 
-				var5 = Prompt.getInt("Enter location", 0, var3.size() - 1);
-				var4 = (Location) var3.get(var5);
+				// Get player's choice
+				choice = Prompt.getInt("Enter location", 0, validMoves.size() - 1);
+				destination = (Location) validMoves.get(choice);
 			} else {
-				var4 = (Location) var3.get(0);
+				// Only one valid move, use it automatically
+				destination = (Location) validMoves.get(0);
 			}
 
-			this.board.removePeg((var1 + var4.getRow()) / 2, (var2 + var4.getCol()) / 2);
-			this.board.removePeg(var1, var2);
-			this.board.putPeg(var4.getRow(), var4.getCol());
+			// Execute the jump:
+			// 1. Remove the peg that was jumped over (midpoint between start and end)
+			this.board.removePeg((row + destination.getRow()) / 2, (col + destination.getCol()) / 2);
+
+			// 2. Remove the peg from its starting position
+			this.board.removePeg(row, col);
+
+			// 3. Place the peg at its destination
+			this.board.putPeg(destination.getRow(), destination.getCol());
 		}
 	}
 
-	public ArrayList<Location> openValidLocations(int var1, int var2) {
-		ArrayList var3 = new ArrayList();
-		if (this.board.isValidLocation(var1 - 2, var2) && !this.board.isPeg(var1 - 2, var2)
-				&& this.board.isPeg(var1 - 1, var2)) {
-			var3.add(new Location(var1 - 2, var2));
+	/**
+	 * Finds all valid jump destinations for a peg at the given position.
+	 * 
+	 * A valid jump requires:
+	 * - A peg at the starting position (row, col)
+	 * - An adjacent peg in the jump direction
+	 * - An empty space two positions away in that direction
+	 * - All positions must be valid board locations
+	 * 
+	 * This method checks all four directions: up, down, left, right.
+	 * 
+	 * @param row the row position of the peg to check
+	 * @param col the column position of the peg to check
+	 * @return ArrayList of Location objects representing valid jump destinations
+	 */
+	public ArrayList<Location> openValidLocations(int row, int col) {
+		// List to store all valid jump destinations
+		ArrayList<Location> validLocations = new ArrayList<Location>();
+
+		// Check jump UP (row - 2)
+		// Requires: destination empty, middle peg exists, both locations valid
+		if (this.board.isValidLocation(row - 2, col) && !this.board.isPeg(row - 2, col)
+				&& this.board.isPeg(row - 1, col)) {
+			validLocations.add(new Location(row - 2, col));
 		}
 
-		if (this.board.isValidLocation(var1 + 2, var2) && !this.board.isPeg(var1 + 2, var2)
-				&& this.board.isPeg(var1 + 1, var2)) {
-			var3.add(new Location(var1 + 2, var2));
+		// Check jump DOWN (row + 2)
+		// Requires: destination empty, middle peg exists, both locations valid
+		if (this.board.isValidLocation(row + 2, col) && !this.board.isPeg(row + 2, col)
+				&& this.board.isPeg(row + 1, col)) {
+			validLocations.add(new Location(row + 2, col));
 		}
 
-		if (this.board.isValidLocation(var1, var2 - 2) && !this.board.isPeg(var1, var2 - 2)
-				&& this.board.isPeg(var1, var2 - 1)) {
-			var3.add(new Location(var1, var2 - 2));
+		// Check jump LEFT (col - 2)
+		// Requires: destination empty, middle peg exists, both locations valid
+		if (this.board.isValidLocation(row, col - 2) && !this.board.isPeg(row, col - 2)
+				&& this.board.isPeg(row, col - 1)) {
+			validLocations.add(new Location(row, col - 2));
 		}
 
-		if (this.board.isValidLocation(var1, var2 + 2) && !this.board.isPeg(var1, var2 + 2)
-				&& this.board.isPeg(var1, var2 + 1)) {
-			var3.add(new Location(var1, var2 + 2));
+		// Check jump RIGHT (col + 2)
+		// Requires: destination empty, middle peg exists, both locations valid
+		if (this.board.isValidLocation(row, col + 2) && !this.board.isPeg(row, col + 2)
+				&& this.board.isPeg(row, col + 1)) {
+			validLocations.add(new Location(row, col + 2));
 		}
 
-		return var3;
+		// Return the list of valid jump destinations
+		return validLocations;
 	}
 
+	/**
+	 * Checks if any valid moves remain on the board.
+	 * 
+	 * This method scans the entire board looking for any empty space
+	 * that could be the destination of a valid jump. For each empty space,
+	 * it checks all four directions (up, down, left, right) to see if
+	 * there are two consecutive pegs that could jump into that space.
+	 * 
+	 * @return true if at least one valid move exists, false otherwise
+	 */
 	public boolean hasValidMove() {
-		for (int var1 = 0; var1 < this.board.getBoardSize(); ++var1) {
-			for (int var2 = 0; var2 < this.board.getBoardSize(); ++var2) {
-				if (this.board.isValidLocation(var1, var2) && !this.board.isPeg(var1, var2)) {
-					if (this.board.isValidLocation(var1 - 2, var2) && this.board.isValidLocation(var1 - 1, var2)
-							&& this.board.isPeg(var1 - 2, var2) && this.board.isPeg(var1 - 1, var2)) {
+		// Scan every position on the board
+		for (int row = 0; row < this.board.getBoardSize(); ++row) {
+			for (int col = 0; col < this.board.getBoardSize(); ++col) {
+				// Only check empty spaces as potential jump destinations
+				if (this.board.isValidLocation(row, col) && !this.board.isPeg(row, col)) {
+
+					// Check if a peg can jump DOWN into this empty space
+					// Requires: peg at row-2 and peg at row-1 (to be jumped over)
+					if (this.board.isValidLocation(row - 2, col) && this.board.isValidLocation(row - 1, col)
+							&& this.board.isPeg(row - 2, col) && this.board.isPeg(row - 1, col)) {
 						return true;
 					}
 
-					if (this.board.isValidLocation(var1 + 2, var2) && this.board.isValidLocation(var1 + 1, var2)
-							&& this.board.isPeg(var1 + 2, var2) && this.board.isPeg(var1 + 1, var2)) {
+					// Check if a peg can jump UP into this empty space
+					// Requires: peg at row+2 and peg at row+1 (to be jumped over)
+					if (this.board.isValidLocation(row + 2, col) && this.board.isValidLocation(row + 1, col)
+							&& this.board.isPeg(row + 2, col) && this.board.isPeg(row + 1, col)) {
 						return true;
 					}
 
-					if (this.board.isValidLocation(var1, var2 - 2) && this.board.isValidLocation(var1, var2 - 1)
-							&& this.board.isPeg(var1, var2 - 2) && this.board.isPeg(var1, var2 - 1)) {
+					// Check if a peg can jump RIGHT into this empty space
+					// Requires: peg at col-2 and peg at col-1 (to be jumped over)
+					if (this.board.isValidLocation(row, col - 2) && this.board.isValidLocation(row, col - 1)
+							&& this.board.isPeg(row, col - 2) && this.board.isPeg(row, col - 1)) {
 						return true;
 					}
 
-					if (this.board.isValidLocation(var1, var2 + 2) && this.board.isValidLocation(var1, var2 + 1)
-							&& this.board.isPeg(var1, var2 + 2) && this.board.isPeg(var1, var2 + 1)) {
+					// Check if a peg can jump LEFT into this empty space
+					// Requires: peg at col+2 and peg at col+1 (to be jumped over)
+					if (this.board.isValidLocation(row, col + 2) && this.board.isValidLocation(row, col + 1)
+							&& this.board.isPeg(row, col + 2) && this.board.isPeg(row, col + 1)) {
 						return true;
 					}
 				}
 			}
 		}
 
+		// No valid moves found anywhere on the board
 		return false;
 	}
 
-	public int convertToInt(String var1) {
-		int var2 = -1;
+	/**
+	 * Converts a string to an integer safely.
+	 * 
+	 * This method attempts to parse a string into an integer value.
+	 * If the string cannot be parsed (e.g., contains non-numeric characters),
+	 * it returns -1 instead of throwing an exception.
+	 * 
+	 * @param str the string to convert
+	 * @return the integer value of the string, or -1 if conversion fails
+	 */
+	public int convertToInt(String str) {
+		// Default value if conversion fails
+		int result = -1;
 
 		try {
-			var2 = Integer.parseInt(var1);
-		} catch (NumberFormatException var4) {
+			// Attempt to parse the string
+			result = Integer.parseInt(str);
+		} catch (NumberFormatException e) {
+			// Silently handle parse errors by returning -1
+			// This allows the calling code to detect invalid input
 		}
 
-		return var2;
+		// Return the parsed value or -1 if parsing failed
+		return result;
 	}
 }

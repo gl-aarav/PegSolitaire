@@ -1,29 +1,10 @@
 /**
- * PegBoard for the Peg Solitaire game.
+ * This class represents the board for the Peg Solitaire game.
+ * It is a 7x7 board with the corners removed, representing the
+ * standard English version of the game.
  *
  * @author Aarav Goyal
- *
- *         This is the English version of the board.
- *         It is a 7x7 board without the corners. The game starts with pegs in
- *         all the locations except the center, as shown below.
- *
- *         col 0 1 2 3 4 5 6
- *         row -------------
- *         0 | P | P | P |
- *         -------------
- *         1 | P | P | P |
- *         -----------------------------
- *         2 | P | P | P | P | P | P | P |
- *         -----------------------------
- *         3 | P | P | P | | P | P | P |
- *         -----------------------------
- *         4 | P | P | P | P | P | P | P |
- *         -----------------------------
- *         5 | P | P | P |
- *         -------------
- *         6 | P | P | P |
- *         -------------
- *
+ * @since September 30, 2025
  */
 
 public class PegBoard {

@@ -1,7 +1,8 @@
 /**
- * Location of row and column in peg board
+ * This class represents a location on the peg board, using a row and column.
  *
  * @author Aarav Goyal
+ * @since September 30, 2025
  */
 public class Location {
 	private int row;
