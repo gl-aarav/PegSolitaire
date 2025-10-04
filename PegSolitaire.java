@@ -11,9 +11,6 @@ public class PegSolitaire {
 	/** The game board containing all peg positions */
 	private PegBoard board = new PegBoard();
 
-	/** Debug flag for development and troubleshooting */
-	private final boolean DEBUG = false;
-
 	/**
 	 * Default constructor for PegSolitaire.
 	 * Initializes a new game with a fresh board.
