@@ -183,7 +183,8 @@ public class PegSolitaireGUI extends JFrame {
         int choice = JOptionPane.showConfirmDialog(this, "Do you want to play again?", "Play Again?",
                 JOptionPane.YES_NO_OPTION);
         if (choice == JOptionPane.YES_OPTION) {
-            game.resetGame(); // Assuming a resetGame method exists
+            game.resetGame();
+            this.board = game.getBoard(); // Update the GUI's board reference
             selectedPeg = null;
             updateGameStatus();
         } else {
