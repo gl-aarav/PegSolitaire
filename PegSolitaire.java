@@ -1,4 +1,4 @@
-import java.util.ArrayList;
+import java.util.ArrayList; // For using ArrayList
 
 /**
  * This class is the main controller for the Peg Solitaire game. It manages
